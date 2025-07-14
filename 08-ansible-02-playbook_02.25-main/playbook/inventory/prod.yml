@@ -1,0 +1,12 @@
+all:
+  children:
+    clickhouse:
+      hosts:
+        clickhouse-01:
+          ansible_host: <IP_here>
+    vector:
+      hosts:
+        vector-server:
+          ansible_host: 158.160.173.79
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: /home/ruchi/.ssh/id_rsa

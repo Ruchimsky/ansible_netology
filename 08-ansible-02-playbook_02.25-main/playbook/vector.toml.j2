@@ -1,0 +1,8 @@
+[sources.syslog]
+type = "file"
+include = ["/var/log/syslog"]
+
+[sinks.console]
+type = "console"
+inputs = ["syslog"]
+encoding.codec = "json"

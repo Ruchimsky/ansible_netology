@@ -1,0 +1,5 @@
+---
+# handlers file for vector-role
+
+- name: Start vector service
+  ansible.builtin.shell: "nohup /usr/bin/vector --config /etc/vector.yml &"

@@ -1,0 +1,38 @@
+---
+# tasks file for nginx
+- name: Get_nginx
+  become: true
+  ansible.builtin.get_url:
+    url: "http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
+    dest: "./nginx-release-centos-7-0.el7.ngx.noarch.rpm"
+    validate_certs: false
+    use_proxy: false
+- name: Install nginx repo
+  become: true
+  ansible.builtin.yum:
+    name: "./nginx-release-centos-7-0.el7.ngx.noarch.rpm"
+    disable_gpg_check: true
+- name: Install nginx
+  become: true
+  yum:
+    name: nginx
+    state: present
+  notify:
+    - start-nginx
+- name: Clean conf.d
+  become: true
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+- name: Add rights
+  become: true
+  ansible.builtin.command: "setenforce Permissive"
+  changed_when: false
+- name: Deploy nginx configuration
+  become: true
+  ansible.builtin.template:
+    src: templates/lh.conf
+    dest: /etc/nginx/conf.d/
+    mode: '0644'
+  notify:
+    - start-nginx

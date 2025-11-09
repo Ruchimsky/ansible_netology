@@ -1,0 +1,5 @@
+---
+# defaults file for lighthouse
+
+lighthouse_version: "0.34.0"
+lh_dir: "/var/www/html"

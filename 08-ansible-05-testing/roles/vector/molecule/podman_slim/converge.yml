@@ -1,0 +1,8 @@
+---
+- name: Converge vector role on podman
+  hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: vector

@@ -1,0 +1,29 @@
+---
+dependency:
+  name: galaxy
+  enabled: false
+
+driver:
+  name: podman
+
+platforms:
+  - name: almalinux8
+    image: docker.io/library/almalinux:8
+    pre_build_image: true
+    command: /sbin/init
+    privileged: true
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/..:${MOLECULE_PROJECT_DIRECTORY}"
+  inventory:
+    host_vars:
+      almalinux8:
+        ansible_connection: podman
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: root
+        ansible_remote_tmp: /tmp
+
+verifier:
+  name: ansible

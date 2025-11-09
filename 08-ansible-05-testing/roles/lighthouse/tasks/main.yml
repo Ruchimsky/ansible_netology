@@ -1,0 +1,21 @@
+---
+# tasks file for lighthouse
+- name: Create_lh_dir
+  become: true
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+    owner: nginx
+    group: nginx
+    mode: '0755'
+- name: Install git
+  become: true
+  yum:
+    name: git
+    state: present
+- name: Copy_lh
+  become: true
+  ansible.builtin.git:
+    repo: 'https://github.com/VKCOM/lighthouse.git'
+    version: master
+    dest: "{{ lh_dir }}"

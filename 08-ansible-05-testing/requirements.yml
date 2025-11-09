@@ -16,5 +16,5 @@
 
   - src: git@github.com:ruchimsky/vector-role.git
     scm: git
-    version: "v1.1.1"
+    version: "1.1.2"
     name: vector

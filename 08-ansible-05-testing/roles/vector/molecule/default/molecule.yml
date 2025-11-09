@@ -1,0 +1,28 @@
+---
+dependency:
+  name: galaxy
+  enabled: false
+
+driver:
+  name: docker
+
+platforms:
+  - name: centos7
+    image: geerlingguy/docker-centos7-ansible
+    privileged: true
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}:${MOLECULE_PROJECT_DIRECTORY}/.."
+  inventory:
+    host_vars:
+      centos7:
+        ansible_connection: docker
+        ansible_python_interpreter: /usr/bin/python
+        ansible_user: root
+        ansible_remote_tmp: /tmp 
+
+verifier:
+  name: ansible

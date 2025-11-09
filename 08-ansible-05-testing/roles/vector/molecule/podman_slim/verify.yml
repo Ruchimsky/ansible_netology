@@ -1,0 +1,15 @@
+---
+- name: Verify vector installation
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Check vector binary
+      command: vector --version
+      register: vector_v
+      changed_when: false
+
+    - name: Assert vector is installed
+      assert:
+        that:
+          - vector_v.rc == 0

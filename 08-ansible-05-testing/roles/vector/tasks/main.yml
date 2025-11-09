@@ -1,0 +1,94 @@
+---
+# Гарантируем наличие каталога
+- name: Ensure /etc/yum.repos.d exists
+  ansible.builtin.file:
+    path: /etc/yum.repos.d
+    state: directory
+    mode: '0755'
+  become: true
+
+# Находим все .repo
+- name: Find existing repo files
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d
+    patterns: "*.repo"
+    file_type: file
+  register: repo_scan
+  become: true
+
+# Удаляем все, КРОМЕ нашего Vault-файла
+- name: Remove non-vault repo files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ repo_scan.files }}"
+  when: item.path != '/etc/yum.repos.d/CentOS-Vault.repo'
+  become: true
+
+# Кладём (или обновляем) одиночный валидный репозиторий Vault
+- name: Install/ensure CentOS-Vault.repo (base/updates/extras)
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/CentOS-Vault.repo
+    mode: '0644'
+    content: |
+      [base]
+      name=CentOS-7 - Base - vault
+      baseurl=http://vault.centos.org/7.9.2009/os/$basearch/
+      enabled=1
+      gpgcheck=0
+
+      [updates]
+      name=CentOS-7 - Updates - vault
+      baseurl=http://vault.centos.org/7.9.2009/updates/$basearch/
+      enabled=1
+      gpgcheck=0
+
+      [extras]
+      name=CentOS-7 - Extras - vault
+      baseurl=http://vault.centos.org/7.9.2009/extras/$basearch/
+      enabled=1
+      gpgcheck=0
+  become: true
+
+# Кэш не считаем изменением — для идемпотентности
+- name: Clean yum cache
+  ansible.builtin.command: yum clean all
+  become: true
+  changed_when: false
+
+- name: Rebuild yum cache
+  ansible.builtin.command: yum makecache -y
+  become: true
+  changed_when: false
+
+# Дальше — твои шаги установки Vector (оставь как у тебя):
+
+- name: Ensure CA certs present (CentOS 7)
+  ansible.builtin.yum:
+    name: ca-certificates
+    state: present
+  become: true
+
+- name: Download Vector RPM to controller
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.get_url:
+    url: https://packages.timber.io/vector/0.34.0/vector-0.34.0-1.x86_64.rpm
+    dest: /tmp/vector-0.34.0-1.x86_64.rpm
+    mode: '0644'
+    timeout: 120
+    validate_certs: yes
+    use_proxy: yes
+
+- name: Copy Vector RPM to target
+  ansible.builtin.copy:
+    src: /tmp/vector-0.34.0-1.x86_64.rpm
+    dest: /tmp/vector-0.34.0-1.x86_64.rpm
+    mode: '0644'
+
+- name: Install Vector from local RPM
+  ansible.builtin.yum:
+    name: /tmp/vector-0.34.0-1.x86_64.rpm
+    state: present
+  become: true
